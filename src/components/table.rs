@@ -406,18 +406,6 @@ impl DrawableComponent for TableComponent {
             .constraints(vec![Constraint::Length(3), Constraint::Length(5)])
             .split(area);
 
-        f.render_widget(
-            Block::default()
-                .title(self.title())
-                .borders(Borders::ALL)
-                .style(if focused {
-                    Style::default()
-                } else {
-                    Style::default().fg(Color::DarkGray)
-                }),
-            layout[1],
-        );
-
         let chunks = Layout::default()
             .vertical_margin(1)
             .horizontal_margin(1)
@@ -440,6 +428,18 @@ impl DrawableComponent for TableComponent {
 
         TableValueComponent::new(self.selected_cells().unwrap_or_default())
             .draw(f, layout[0], focused)?;
+
+        f.render_widget(
+            Block::default()
+                .title(self.title())
+                .borders(Borders::ALL)
+                .style(if focused {
+                    Style::default()
+                } else {
+                    Style::default().fg(Color::DarkGray)
+                }),
+            layout[1],
+        );
 
         let block = Block::default().borders(Borders::NONE);
         let (selected_column_index, headers, rows, constraints) =

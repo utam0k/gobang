@@ -98,6 +98,7 @@ pub struct KeyConfig {
     pub tab_constraints: Key,
     pub tab_foreign_keys: Key,
     pub tab_indexes: Key,
+    pub tab_sql_editor: Key,
 }
 
 impl Default for KeyConfig {
@@ -130,6 +131,7 @@ impl Default for KeyConfig {
             tab_constraints: Key::Char('3'),
             tab_foreign_keys: Key::Char('4'),
             tab_indexes: Key::Char('5'),
+            tab_sql_editor: Key::Char('6'),
         }
     }
 }

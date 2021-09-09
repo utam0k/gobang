@@ -6,7 +6,7 @@ use crate::{
     components::tab::Tab,
     components::{
         command, ConnectionsComponent, DatabasesComponent, ErrorComponent, HelpComponent,
-        RecordTableComponent, TabComponent, TableComponent,
+        RecordTableComponent, SqlEditorComponent, TabComponent, TableComponent,
     },
     config::Config,
 };
@@ -28,6 +28,7 @@ pub struct App {
     constraint_table: TableComponent,
     foreign_key_table: TableComponent,
     index_table: TableComponent,
+    sql_editor: SqlEditorComponent,
     focus: Focus,
     tab: TabComponent,
     help: HelpComponent,
@@ -48,6 +49,7 @@ impl App {
             constraint_table: TableComponent::new(config.key_config.clone()),
             foreign_key_table: TableComponent::new(config.key_config.clone()),
             index_table: TableComponent::new(config.key_config.clone()),
+            sql_editor: SqlEditorComponent::new(config.key_config.clone()),
             tab: TabComponent::new(config.key_config.clone()),
             help: HelpComponent::new(config.key_config.clone()),
             databases: DatabasesComponent::new(config.key_config.clone()),
@@ -77,8 +79,7 @@ impl App {
             .split(f.size());
 
         self.databases
-            .draw(f, main_chunks[0], matches!(self.focus, Focus::DabataseList))
-            .unwrap();
+            .draw(f, main_chunks[0], matches!(self.focus, Focus::DabataseList))?;
 
         let right_chunks = Layout::default()
             .direction(Direction::Vertical)
@@ -109,6 +110,10 @@ impl App {
             Tab::Indexes => {
                 self.index_table
                     .draw(f, right_chunks[1], matches!(self.focus, Focus::Table))?
+            }
+            Tab::Sql => {
+                self.sql_editor
+                    .draw(f, right_chunks[1], matches!(self.focus, Focus::Table))?;
             }
         }
         self.error.draw(f, Rect::default(), false)?;
@@ -425,6 +430,17 @@ impl App {
                             if let Some(text) = self.index_table.selected_cells() {
                                 copy_to_clipboard(text.as_str())?
                             }
+                        };
+                    }
+                    Tab::Sql => {
+                        if self.sql_editor.event(key)?.is_consumed()
+                            || self
+                                .sql_editor
+                                .async_event(key, self.pool.as_ref().unwrap())
+                                .await?
+                                .is_consumed()
+                        {
+                            return Ok(EventState::Consumed);
                         };
                     }
                 };

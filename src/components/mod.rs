@@ -4,7 +4,7 @@ pub mod databases;
 pub mod error;
 pub mod help;
 pub mod record_table;
-pub mod syntax_text;
+pub mod sql_editor;
 pub mod tab;
 pub mod table;
 pub mod table_filter;
@@ -18,12 +18,14 @@ pub use databases::DatabasesComponent;
 pub use error::ErrorComponent;
 pub use help::HelpComponent;
 pub use record_table::RecordTableComponent;
+pub use sql_editor::SqlEditorComponent;
 pub use tab::TabComponent;
 pub use table::TableComponent;
 pub use table_filter::TableFilterComponent;
 pub use table_status::TableStatusComponent;
 pub use table_value::TableValueComponent;
 
+use crate::database::Pool;
 use anyhow::Result;
 use async_trait::async_trait;
 use std::convert::TryInto;
@@ -62,6 +64,14 @@ pub trait Component {
     fn commands(&self, out: &mut Vec<CommandInfo>);
 
     fn event(&mut self, key: crate::event::Key) -> Result<EventState>;
+
+    async fn async_event(
+        &mut self,
+        _key: crate::event::Key,
+        _pool: &Box<dyn Pool>,
+    ) -> Result<EventState> {
+        Ok(EventState::NotConsumed)
+    }
 
     fn focused(&self) -> bool {
         false
